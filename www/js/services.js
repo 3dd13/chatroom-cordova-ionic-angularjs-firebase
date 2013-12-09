@@ -1,26 +1,33 @@
-angular.module('starter.services', [])
+angular.module('chatRoom.services', [])
 
-/**
- * A simple example service that returns some data.
- */
-.factory('Pets', function() {
+.factory('Rooms', function() {
   // Might use a resource here that returns a JSON array
 
   // Some fake testing data
-  var pets = [
-    { id: 0, title: 'Cats', description: 'Furry little creatures. Obsessed with plotting assassination, but never following through on it.' },
-    { id: 1, title: 'Dogs', description: 'Lovable. Loyal almost to a fault. Smarter than they let on.' },
-    { id: 2, title: 'Turtles', description: 'Everyone likes turtles.' },
-    { id: 3, title: 'Sharks', description: 'An advanced pet. Needs millions of gallons of salt water. Will happily eat you.' }
+  var rooms = [
+    { id: 0, title: 'WDI HK Sept 2013 Instructors', description: 'Instructors only.' },
+    { id: 1, title: 'WDI HK Sept 2013 Secrets', description: 'Making fun of instructors. Cats and Baby gif here.' },
+    { id: 2, title: 'WDI NY Sept 2013', description: 'All students in the course.' },
+    { id: 3, title: 'WDI NY Dec 2013', description: 'All students in the course.' },
   ];
 
   return {
     all: function() {
-      return pets;
+      return rooms;
     },
-    get: function(petId) {
+    get: function(roomId) {
       // Simple index lookup
-      return pets[petId];
+      return rooms[roomId];
+    },
+    add: function(title, slug, description) {
+      var newRoom = {
+        id: rooms.length + 1,
+        title: title,
+        slug: slug,
+        description: description
+      };
+      rooms.push(newRoom);
+      return newRoom;
     }
   }
 });

@@ -1,13 +1,11 @@
-angular.module('starter.controllers', [])
+angular.module('chatRoom.controllers', [])
 
 .controller('AppCtrl', function($scope) {
   // Main app controller, empty for the example
 })
 
-// A simple controller that fetches a list of data
-.controller('PetsTabCtrl', function($scope, Pets) {
-  // "Pets" is a service returning mock data (services.js)
-  $scope.pets = Pets.all();
+.controller('RoomsTabCtrl', function($scope, Rooms) {
+  $scope.rooms = Rooms.all();
 
   $scope.$on('tab.shown', function() {
     // Might do a load here
@@ -17,8 +15,29 @@ angular.module('starter.controllers', [])
   });
 })
 
-// A simple controller that shows a tapped item's data
-.controller('PetCtrl', function($scope, $routeParams, Pets) {
-  // "Pets" is a service returning mock data (services.js)
-  $scope.pet = Pets.get($routeParams.petId);
+.controller('NewRoomCtrl', function($scope, $routeParams, $location, Rooms) {
+  $scope.newRoomName = "";
+  $scope.newRoomNameId = "";
+  
+  $scope.$on('tab.shown', function() {
+    $scope.newRoomName = "";
+    $scope.newRoomNameId = "";
+  });
+  
+  $scope.$on('tab.hidden', function() {
+    // Might recycle content here
+  });
+    
+  $scope.setNewRoomNameId = function() {
+    this.newRoomNameId = this.newRoomName.toLowerCase().replace(/\s/g,"-").replace(/[^a-z0-9\-]/g, '');
+  };
+  
+  $scope.createRoom = function() {
+    Rooms.add(this.newRoomName, this.newRoomNameId, this.newRoomDescription);    
+    $scope.controllers[0].tabsController.select(2);
+  }
+})
+
+.controller('RoomCtrl', function($scope, $routeParams, Rooms) {
+  $scope.room = Rooms.get($routeParams.roomId);
 });

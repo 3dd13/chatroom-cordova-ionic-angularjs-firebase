@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.ionicframework.starter" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>StarterApp</name>
+<widget id="com.ionicframework.chatRoom" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>ChatRoom.io</name>
     <description>
-        A sample Ionic Framework app using Cordova and AngularJS
+        Chat Room apps building on Ionic Framework app using Cordova and AngularJS
     </description>
-    <author email="max@drifty.com" href="http://ionicframework.com">
-        Apache Cordova Team
+    <author email="hi@3dd13.me" href="http://3dd13.me">
+        Eddie Lau
     </author>
     <content src="index.html" />
     <access origin="*" />

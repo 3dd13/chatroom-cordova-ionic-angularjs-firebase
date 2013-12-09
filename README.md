@@ -41,3 +41,11 @@ Start modifying code and add features !
 all the source code is in www folder
 read [Ionic Tutorials](http://ionicframework.com/tutorials/)
 
+when you develop, you would want to run the page on your dev machine:
+
+    cd www
+    python -m SimpleHTTPServer 8000
+
+you may want to use Grunt when you develop the pages on your dev machine, checkout:
+
+    http://devgeeks.org/slides/melbourne-mobile-talk-2013.2.12/
