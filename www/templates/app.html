@@ -27,15 +27,18 @@
         <form data-ng-submit="createRoom()">
           <div class="list list-inset">
             <label class="item item-input">
-              <input type="text" placeholder="Chat room name" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
+              <span class="input-label">Chat room name</span>
+              <input type="text" placeholder="e.g. Homework Discussion" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
             </label>
             <label class="item item-input">
-              <input type="text" placeholder="Room id" data-ng-model="newRoomNameId" readonly="readonly">
+              <span class="input-label">Room ID</span>              
+              <input type="text"  data-ng-model="newRoomNameId" readonly="readonly">
             </label>                    
             <label class="item item-input">
-              <input type="text" placeholder="Chat room description" data-ng-model="newRoomDescription">
+              <span class="input-label">Chat room description</span>              
+              <input type="text" placeholder="e.g. How to do recursion" data-ng-model="newRoomDescription" >
             </label>
-            <input type="submit" class="button button-positive button-block" />
+            <input type="submit" class="button button-positive button-outline" />
           </div>
         </form>
       </content>

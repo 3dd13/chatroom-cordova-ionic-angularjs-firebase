@@ -1,11 +1,28 @@
-<!--
-  This template was loaded because of the '/pet/:petId' route (app.js)
-  'pet' is a $scope variable created in the PetCtrl controller (controllers.js)
-  The PetCtrl pulls data from the Pets service (service.js)
-  The Pets service returns an array of pet data
--->
 <nav-page title="room.title">
-  <content has-header="true" padding="true">
-    {{ room.description }}
+  <content has-header="true" padding="true">    
+    <div ng-repeat="message in room.messages" type="item-text-wrap">    
+      <div class="card">
+        <div class="item item-divider">
+          <div class="row">
+            <div class="col">{{message.created_by}}</div>
+            <div class="col text-right">{{message.created_at | date: 'short' }}</div>
+          </div>
+        </div>
+        <div class="item item-body item-text-wrap">
+          {{message.content}}
+        </div>
+      </div>
+    </div>
   </content>
+  
+  <div class="bar bar-footer bar-stable" id="bar-footer-message-box">
+    <div class="list list-inset">
+      <form ui-keypress="{13:'submitAddMessage($event)'}" data-ng-submit="submitAddMessage()" >
+        <label class="item item-input">
+          <input type="text" placeholder="your message ..." data-ng-model="newMessage">
+          <input type="submit" class="button button-outline button-positive button-small" value="Send">
+        </label>
+      </form>
+    </div>
+  </div>
 </nav-page>

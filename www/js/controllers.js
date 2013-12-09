@@ -40,4 +40,16 @@ angular.module('chatRoom.controllers', [])
 
 .controller('RoomCtrl', function($scope, $routeParams, Rooms) {
   $scope.room = Rooms.get($routeParams.roomId);
+  $scope.newMessage = "";
+  
+  $scope.submitAddMessage = function() {
+    data = {
+      created_by: "Eddie Lau Current",
+      content: this.newMessage,
+      created_at: new Date()
+    };
+    this.room.messages.push(data);
+    
+    this.newMessage = "";
+  }
 });
