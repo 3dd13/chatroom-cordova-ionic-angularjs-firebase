@@ -1,3 +1,5 @@
+<nav-bar animation="nav-title-slide-ios7" class="nav-title-slide-ios7" type="bar-calm" back-button-type="button-icon" back-button-icon="icon ion-arrow-left-c">
+</nav-bar>
 <nav-page title="room.title">
   <content
     has-header="true"
@@ -7,11 +9,12 @@
     on-refresh="onRefresh()"
     on-refresh-opening="onRefreshOpening(amount)"
     refresh-complete="refreshComplete"
+     animate-nav="true"
     >
 
     <!-- for pull to refresh -->
     <refresher></refresher>
-      
+  
     <div ng-repeat="message in room.messages" type="item-text-wrap">    
       <div class="card item-message">
         <div class="item-message-header">
@@ -26,7 +29,7 @@
       </div>
     </div>
   </content>
-  
+
   <div class="bar bar-footer bar-stable" id="bar-footer-message-box">
     <div class="list list-inset">
       <form ui-keypress="{13:'submitAddMessage($event)'}" data-ng-submit="submitAddMessage()" >

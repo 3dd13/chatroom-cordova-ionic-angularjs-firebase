@@ -1,11 +1,22 @@
 angular.module('chatRoom.controllers', [])
 
 .controller('AppCtrl', function($scope) {
-  // Main app controller, empty for the example
+  $scope.toggleSideMenu = function() {
+    $scope.sideMenuController.toggleLeft();
+  };  
 })
 
-.controller('RoomsTabCtrl', function($scope, $timeout, Rooms) {
+.controller('MainCtrl', function($scope, $timeout, Rooms) {
   $scope.rooms = Rooms.all();
+  
+  $scope.rightButtons = [
+    { 
+      type: 'button-positive',
+      content: '<i class="icon ion-navicon"></i>',
+      tap: function(e) {
+      }
+    }
+  ]
   
   $scope.onRefresh = function() {    
     var stop = $timeout(function() {
@@ -65,4 +76,7 @@ angular.module('chatRoom.controllers', [])
     
     this.newMessage = "";
   }
+})
+
+.controller('AboutCtrl', function($scope) {
 });

@@ -7,13 +7,24 @@ angular.module('chatRoom', ['ionic', 'ngRoute', 'ngAnimate', 'chatRoom.services'
 .config(function($routeProvider, $locationProvider) {
   $routeProvider.when('/home', {
     templateUrl: 'templates/app.html',
-    controller: 'AppCtrl'
+    controller: 'MainCtrl'
   });
+  
+  $routeProvider.when('/rooms/new', {
+    templateUrl: 'templates/new_room.html',
+    controller: 'NewRoomCtrl'
+  });  
   
   $routeProvider.when('/rooms/:roomId', {
     templateUrl: 'templates/room.html',
     controller: 'RoomCtrl'
   });
+
+  
+  $routeProvider.when('/about', {
+    templateUrl: 'templates/about.html',
+    controller: 'AboutCtrl'
+  });    
   
   $routeProvider.otherwise({
     redirectTo: '/home'
