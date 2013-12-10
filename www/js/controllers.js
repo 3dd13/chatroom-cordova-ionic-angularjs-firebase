@@ -4,8 +4,15 @@ angular.module('chatRoom.controllers', [])
   // Main app controller, empty for the example
 })
 
-.controller('RoomsTabCtrl', function($scope, Rooms) {
+.controller('RoomsTabCtrl', function($scope, $timeout, Rooms) {
   $scope.rooms = Rooms.all();
+  
+  $scope.onRefresh = function() {    
+    var stop = $timeout(function() {
+      $scope.rooms = Rooms.all();
+      $scope.$broadcast('scroll.refreshComplete');
+    }, 1000);
+  };
 
   $scope.$on('tab.shown', function() {
     // Might do a load here
@@ -32,15 +39,21 @@ angular.module('chatRoom.controllers', [])
     this.newRoomNameId = this.newRoomName.toLowerCase().replace(/\s/g,"-").replace(/[^a-z0-9\-]/g, '');
   };
   
-  $scope.createRoom = function() {
+  $scope.createRoom = function() { 
     Rooms.add(this.newRoomName, this.newRoomNameId, this.newRoomDescription);    
-    $scope.controllers[0].tabsController.select(2);
+    $scope.controllers[0].tabsController.select(0);
   }
 })
 
-.controller('RoomCtrl', function($scope, $routeParams, Rooms) {
+.controller('RoomCtrl', function($scope, $routeParams, $timeout, Rooms) {
   $scope.room = Rooms.get($routeParams.roomId);
   $scope.newMessage = "";
+  
+  $scope.onRefresh = function() {    
+    var stop = $timeout(function() {
+      $scope.$broadcast('scroll.refreshComplete');
+    }, 1000);
+  };
   
   $scope.submitAddMessage = function() {
     data = {

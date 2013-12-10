@@ -1,16 +1,16 @@
 /*!
  * Copyright 2013 Drifty Co.
  * http://drifty.com/
-
- * Ionic - a powerful HTML5 mobile app framework.
+ *
+ * Ionic, v0.9.14
+ * A powerful HTML5 mobile app framework.
  * http://ionicframework.com/
  *
  * By @maxlynch, @helloimben, @adamdbradley <3
  *
  * Licensed under the MIT license. Please see LICENSE for more information.
  *
- */
-;
+ */;
 /**
  * Create a wrapping module to ease having to include too many
  * modules.
@@ -27,6 +27,7 @@ angular.module('ionic.service', [
 
 angular.module('ionic.ui', [
                             'ionic.ui.content',
+                            'ionic.ui.scroll',
                             'ionic.ui.tabs',
                             'ionic.ui.navRouter',
                             'ionic.ui.header',
@@ -164,7 +165,7 @@ angular.module('ionic.service.loading', ['ionic.ui.loading'])
       // Make sure there is only one loading element on the page at one point in time
       var existing = angular.element($document[0].querySelector('.loading-backdrop'));
       if(existing.length) {
-        var scope = existing.scope();
+        scope = existing.scope();
         if(scope.loading) {
           scope.loading.show();
           return scope.loading;
@@ -303,6 +304,9 @@ angular.module('ionic.service.platform', [])
       setTimeout(afterReadyWait, 50);
     }
   }, 10);
+
+
+
 
   return {
     setPlatform: function(p) {
@@ -503,12 +507,12 @@ angular.module('ionic.ui.header', ['ngAnimate'])
     transclude: true,
     template: '<header class="bar bar-header">\
                 <div class="buttons">\
-                  <button ng-repeat="button in leftButtons" class="button" ng-class="button.type" ng-click="button.click($event, $index)" ng-bind-html="button.content">\
+                  <button ng-repeat="button in leftButtons" class="button" ng-class="button.type" ng-click="button.tap($event, $index)" ng-bind-html="button.content">\
                   </button>\
                 </div>\
                 <h1 class="title" ng-bind-html="title"></h1>\
                 <div class="buttons">\
-                  <button ng-repeat="button in rightButtons" class="button" ng-class="button.type" ng-click="button.click($event, $index)" ng-bind-html="button.content">\
+                  <button ng-repeat="button in rightButtons" class="button" ng-class="button.type" ng-click="button.tap($event, $index)" ng-bind-html="button.content">\
                   </button>\
                 </div>\
               </header>',
@@ -583,32 +587,29 @@ angular.module('ionic.ui.checkbox', [])
     require: '?ngModel',
     scope: {},
     transclude: true,
-    template: '<label ng-click="tapHandler($event)" class="checkbox"><input type="checkbox"><div ng-transclude></div></label>',
-  
+    template: '<li class="item item-checkbox">\
+                <label class="checkbox">\
+                  <input type="checkbox">\
+                </label>\
+                <div class="item-content" ng-transclude>\
+                </div>\
+              </li>',
 
     link: function($scope, $element, $attr, ngModel) {
       var checkbox;
 
       if(!ngModel) { return; }
 
-      checkbox = $element.children().eq(0);
+      checkbox = angular.element($element[0].querySelector('input[type="checkbox"]'));
 
       if(!checkbox.length) { return; }
 
-      $scope.tapHandler = function(e) {
-        if(e.type != 'click') {
-          checkbox[0].checked = !checkbox[0].checked;
-        }
+      checkbox.bind('change', function(e) {
         ngModel.$setViewValue(checkbox[0].checked);
-        e.alreadyHandled = true;
-      };
-
-      var clickHandler = function(e) {
-        checkbox[0].checked = !checkbox[0].checked;
         $scope.$apply(function() {
-          ngModel.$setViewValue(checkbox[0].checked);
+          e.alreadyHandled = true;
         });
-      };
+      });
 
       if(ngModel) {
         ngModel.$render = function() {
@@ -641,7 +642,7 @@ angular.module('ionic.ui.content', [])
 
 // The content directive is a core scrollable content area
 // that is part of many View hierarchies
-.directive('content', ['$parse', function($parse) {
+.directive('content', ['$parse', '$timeout', function($parse, $timeout) {
   return {
     restrict: 'E',
     replace: true,
@@ -650,17 +651,20 @@ angular.module('ionic.ui.content', [])
     scope: {
       onRefresh: '&',
       onRefreshOpening: '&',
+      onScroll: '&',
+      onScrollComplete: '&',
       refreshComplete: '=',
-      scroll: '@'
+      scroll: '@',
+      hasScrollX: '@',
+      hasScrollY: '@',
+      scrollEventInterval: '@'
     },
     compile: function(element, attr, transclude) {
       return function($scope, $element, $attr) {
-        var 
-        c = $element.eq(0),
-        clone,
-        sc, 
-        sv,
-        addedPadding = false;
+        var clone, sc, sv;
+
+        var addedPadding = false;
+        var c = $element.eq(0);
 
         if(attr.hasHeader == "true") {
           c.addClass('has-header');
@@ -673,15 +677,6 @@ angular.module('ionic.ui.content', [])
         }
         if(attr.hasTabs == "true") {
           c.addClass('has-tabs');
-        }
-
-        if(attr.refreshComplete) {
-          $scope.refreshComplete = function() {
-            if($scope.scrollView) {
-              $scope.scrollView.doneRefreshing();
-              $scope.$parent.$broadcast('scroll.onRefreshComplete');
-            }
-          };
         }
 
         // If they want plain overflow scrolling, add that as a class
@@ -700,25 +695,71 @@ angular.module('ionic.ui.content', [])
             addedPadding = true;
           }
           $element.append(sc);
-          // Otherwise, supercharge this baby!
-          sv = new ionic.views.Scroll({
-            el: $element[0].firstElementChild,
-            hasPullToRefresh: (typeof $scope.onRefresh !== 'undefined'),
-            onRefresh: function() {
-              $scope.onRefresh();
-              $scope.$parent.$broadcast('scroll.onRefresh');
-            },
-            onRefreshOpening: function(amt) {
-              $scope.onRefreshOpening({amount: amt});
-              $scope.$parent.$broadcast('scroll.onRefreshOpening', amt);
-            }
-          });
-          // Let child scopes access this 
-          $scope.scrollView = sv;
 
           // Pass the parent scope down to the child
           clone = transclude($scope.$parent);
           angular.element($element[0].firstElementChild).append(clone);
+
+          var refresher = $element[0].querySelector('.scroll-refresher');
+          var refresherHeight = refresher && refresher.clientHeight || 0;
+
+          if(attr.refreshComplete) {
+            $scope.refreshComplete = function() {
+              if($scope.scrollView) {
+                refresher && refresher.classList.remove('active');
+                $scope.scrollView.finishPullToRefresh();
+                $scope.$parent.$broadcast('scroll.onRefreshComplete');
+              }
+            };
+          }
+
+
+          // Otherwise, supercharge this baby!
+          // Add timeout to let content render so Scroller.resize grabs the right content height
+          $timeout(function() { 
+            sv = new ionic.views.Scroll({
+              el: $element[0],
+              scrollEventInterval: parseInt($scope.scrollEventInterval, 10) || 20,
+              scrollingComplete: function() {
+                $scope.onScrollComplete({
+                  scrollTop: this.__scrollTop,
+                  scrollLeft: this.__scrollLeft
+                });
+              }
+            });
+
+            // Activate pull-to-refresh
+            if(refresher) {
+              sv.activatePullToRefresh(refresherHeight, function() {
+                refresher.classList.add('active');
+              }, function() {
+                refresher.classList.remove('refreshing');
+                refresher.classList.remove('active');
+              }, function() {
+                refresher.classList.add('refreshing');
+                $scope.onRefresh();
+                $scope.$parent.$broadcast('scroll.onRefresh');
+              });
+            }
+
+            $element.bind('scroll', function(e) {
+              $scope.onScroll({
+                event: e,
+                scrollTop: e.detail ? e.detail.scrollTop : e.originalEvent ? e.originalEvent.detail.scrollTop : 0,
+                scrollLeft: e.detail ? e.detail.scrollLeft: e.originalEvent ? e.originalEvent.detail.scrollLeft : 0
+              });
+            });
+
+            $scope.$parent.$on('scroll.refreshComplete', function(e) {
+              sv && sv.finishPullToRefresh();
+            });
+            
+            // Let child scopes access this 
+            $scope.$parent.scrollView = sv;
+          }, 500);
+
+
+
         }
 
         // if padding attribute is true, then add padding if it wasn't added to the .scroll
@@ -736,31 +777,17 @@ angular.module('ionic.ui.content', [])
     restrict: 'E',
     replace: true,
     require: ['^?content', '^?list'],
-    template: '<div class="scroll-refresher"><div class="ionic-refresher-content"><div class="ionic-refresher"></div></div></div>',
-    scope: true,
-    link: function($scope, $element, $attr, scrollCtrl) {
-      var icon = $element[0].querySelector('.ionic-refresher');
-
-      // Scale up the refreshing icon
-      var onRefreshOpening = ionic.throttle(function(e, amt) {
-        icon.style[ionic.CSS.TRANSFORM] = 'scale(' + Math.min((1 + amt), 2) + ')';
-      }, 100);
-
-      $scope.$on('scroll.onRefresh', function(e) {
-        icon.style[ionic.CSS.TRANSFORM] = 'scale(2)';
-      });
-
-      $scope.$on('scroll.onRefreshOpening', onRefreshOpening);
-    }
+    template: '<div class="scroll-refresher"><div class="ionic-refresher-content"><i class="icon ion-arrow-down-c icon-pulling"></i><i class="icon ion-loading-d icon-refreshing"></i></div></div>',
+    scope: true
   };
 })
 
-.directive('scroll-refresher', function() {
+.directive('scrollRefresher', function() {
   return {
     restrict: 'E',
     replace: true,
     transclude: true,
-    template: '<div class="scroll-refresher"><div class="scroll-refresher-content"></div></div>'
+    template: '<div class="scroll-refresher"><div class="scroll-refresher-content" ng-transclude></div></div>'
   };
 });
 
@@ -789,7 +816,7 @@ angular.module('ionic.ui.list', ['ngAnimate'])
       type: '@',
       href: '@'
     },
-    template: '<a href="{{href}}" class="item">\
+    template: '<a href="{{href}}" ng-click="onSelect()" class="item">\
             <div class="item-edit" ng-if="canDelete && isEditing">\
               <button class="button button-icon icon" ng-class="deleteIcon" ng-click="onDelete()"></button>\
             </div>\
@@ -868,7 +895,7 @@ angular.module('ionic.ui.list', ['ngAnimate'])
       buttons: '=',
       type: '@',
     },
-    template: '<li class="item">\
+    template: '<li ng-click="onSelect()" class="item">\
             <div class="item-edit" ng-if="canDelete && isEditing">\
               <button class="button button-icon icon" ng-class="deleteIcon" ng-click="onDelete()"></button>\
             </div>\
@@ -1022,360 +1049,6 @@ angular.module('ionic.ui.loading', [])
 'use strict';
 
 /**
- * Note: currently unused
- */
-
-/**
- * @description
- * The NavController is a navigation stack View Controller modelled off of 
- * UINavigationController from Cocoa Touch. With the Nav Controller, you can
- * "push" new "pages" on to the navigation stack, and then pop them off to go
- * back. The NavController controls a navigation bar with a back button and title
- * which updates as the pages switch.
- *
- * The NavController makes sure to not recycle scopes of old pages
- * so that a pop will still show the same state that the user left.
- *
- * However, once a page is popped, its scope is destroyed and will have to be
- * recreated then next time it is pushed.
- *
- */
-angular.module('ionic.ui.nav', ['ionic.service.templateLoad', 'ionic.service.gesture', 'ionic.service.platform', 'ngAnimate'])
-
-.controller('NavCtrl', ['$scope', '$element', '$animate', '$compile', '$timeout', 'TemplateLoader', 'Platform', function($scope, $element, $animate, $compile, $timeout, TemplateLoader, Platform) {
-  var _this = this;
-
-  angular.extend(this, ionic.controllers.NavController.prototype);
-
-  var pushInAnimation = $scope.pushInAnimation || 'slide-in-left';
-  var pushOutAnimation = $scope.pushOutAnimation || 'slide-out-left';
-  var popInAnimation = $scope.popInAnimation || 'slide-in-right';
-  var popOutAnimation = $scope.popOutAnimation || 'slide-out-right';
-
-  // Remove some push classnames
-  var cleanElementAnimations = function(el) {
-    el.removeClass(pushInAnimation);
-    el.removeClass(pushOutAnimation);
-    el.removeClass(popInAnimation);
-    el.removeClass(popOutAnimation);
-  }
-
-  /**
-   * Push a template onto the navigation stack.
-   * @param {string} templateUrl the URL of the template to load.
-   */
-  this.pushFromTemplate = function(templateUrl) {
-    var childScope = $scope.$new();
-    var last = _this.getTopController();
-
-    // Load the given template
-    TemplateLoader.load(templateUrl).then(function(templateString) {
-
-      // Compile the template with the new scope, and append
-      // it to the navigation's content area
-      var el = $compile(templateString)(childScope, function(cloned, scope) {
-
-        // If there was a last controller, remove it and mark the new
-        // one to animate
-        if(last) {
-          // Push animate
-          cleanElementAnimations(last.element);
-          $animate.addClass(last.element, pushOutAnimation, function() {
-            last.element[0].style.display = 'none';
-            last.element.removeClass(pushOutAnimation);
-          });
-
-        }
-
-
-        if(last) {
-          // We will need to animate in the new page since we have an old page
-          cloned.addClass(pushInAnimation);
-          $animate.addClass(cloned, pushInAnimation);
-        }
-
-        $animate.enter(cloned, $element, null, function() {
-        });
-
-      });
-    });
-  };
-
-  // Pop function
-  this.popController = function() {
-    var last = _this.pop();
-
-    var next = _this.getTopController();
-
-    if(last) {
-
-      cleanElementAnimations(last.element);
-      $animate.addClass(last.element, popOutAnimation, function() {
-        last.scope.$destroy();
-        last.element.remove();
-      });
-    }
-
-    // Animate the next one in
-    if(next) {
-      cleanElementAnimations(next.element);
-      $animate.addClass(next.element, popInAnimation)
-      next.element[0].style.display = 'block';
-    }
-
-    $scope.$parent.$broadcast('navigation.pop');
-  };
-
-
-  // Extend the low-level navigation controller
-  // for this angular controller
-  ionic.controllers.NavController.call(this, {
-    content: {
-    },
-    navBar: {
-      shouldGoBack: function() {
-      },
-      show: function() {
-        this.isVisible = true;
-      },
-      hide: function() {
-        this.isVisible = false;
-      },
-      setTitle: function(title) {
-        $scope.navController.title = title;
-      },
-      showBackButton: function(show) {
-      },
-    }
-  });
-
-  // Support Android hardware back button (native only, not mobile web)
-  var onHardwareBackButton = function(e) {
-    $scope.$apply(function() {
-      _this.popController();
-    });
-  }
-  Platform.onHardwareBackButton(onHardwareBackButton);
-
-
-  this.handleDrag = function(e) {
-    // TODO: Support dragging between pages
-  };
-
-  this.endDrag = function(e) {
-  };
-
-  /**
-   * Push a controller to the stack. This is called by the child
-   * nav-content directive when it is linked to a scope on the page.
-   */
-  $scope.pushController = function(scope, element) {
-    _this.push({
-      scope: scope,
-      element: element
-    });
-    $scope.$parent.$broadcast('navigation.push', scope);
-  };
-
-  this.pushController = function(scope, element) {
-    _this.push({
-      scope: scope,
-      element: element
-    });
-    $scope.$parent.$broadcast('navigation.push', scope);
-  };
-
-  $scope.navController = this;
-
-  $scope.$on('$destroy', function() {
-    // Remove back button listener
-    Platform.offHardwareBackButton(onHardwareBackButton);
-  });
-}])
-
-/**
- * The main directive for the controller.
- */
-.directive('navigation', function() {
-  return {
-    restrict: 'E',
-    replace: true,
-    transclude: true,
-    controller: 'NavCtrl',
-    //templateUrl: 'ext/angular/tmpl/ionicTabBar.tmpl.html',
-    template: '<div class="view" ng-transclude></div>',
-    scope: {
-      first: '@',
-      pushAnimation: '@',
-      popAnimation: '@'
-    },
-    link: function($scope, $element, $attr, navCtrl) {
-      $scope.pushAnimation = $scope.pushAnimation || 'slide-in-left';
-      $scope.popAnimation = $scope.popAnimation || 'slide-out-left';
-
-      if($scope.first) {
-        navCtrl.pushFromTemplate($scope.first);
-      }
-    }
-  };
-})
-
-/**
- * Our Nav Bar directive which updates as the controller state changes.
- */
-.directive('navBar', function() {
-  return {
-    restrict: 'E',
-    require: '^navigation',
-    replace: true,
-    scope: {
-      type: '@',
-      backButtonType: '@',
-      backButtonLabel: '@',
-      backButtonIcon: '@',
-      alignTitle: '@'
-    },
-    template: '<header class="bar bar-header nav-bar" ng-class="{hidden: !navController.navBar.isVisible}">' + 
-        '<button ng-click="goBack()" class="button" ng-if="navController.controllers.length > 1" ng-class="backButtonType" ng-bind-html="backButtonContent"></button>' +
-        '<h1 class="title">{{navController.getTopController().scope.title}}</h1>' + 
-      '</header>',
-    link: function($scope, $element, $attr, navCtrl) {
-      var backButton;
-
-      $scope.backButtonContent = '';
-
-      if($scope.backButtonIcon) {
-        $scope.backButtonContent += '<i class="icon ' + $scope.backButtonIcon + '"></i>';
-      }
-      if($scope.backButtonLabel) {
-        $scope.backButtonContent += ' ' + $scope.backButtonLabel
-      }
-
-
-      $scope.navController = navCtrl;
-
-      $scope.goBack = function() {
-        navCtrl.popController();
-      };
-
-
-      var hb = new ionic.views.HeaderBar({
-        el: $element[0],
-        alignTitle: $scope.alignTitle || 'center'
-      });
-
-      $element.addClass($scope.type);
-
-      $scope.headerBarView = hb;
-
-      $scope.$parent.$on('navigation.push', function() {
-        backButton = angular.element($element[0].querySelector('.button'));
-        backButton.addClass($scope.backButtonType);
-        hb.align();
-      });
-      $scope.$parent.$on('navigation.pop', function() {
-        hb.align();
-      });
-
-      $scope.$on('$destroy', function() {
-        //
-      });
-    }
-  };
-})
-
-.directive('navPage', ['Gesture', '$animate', '$compile', function(Gesture, $animate, $compile) {
-
-  return {
-    restrict: 'AC',
-    require: '^navigation',
-    link: function($scope, $element, $attr, navCtrl) {
-      var lastParent, lastIndex, childScope, childElement;
-
-      // Store that we should go forwards on the animation. This toggles
-      // based on the visibility sequence (to support reverse transitions)
-      var lastDirection = null;
-
-      $scope.title = $attr.title;
-
-      if($attr.navBar === "false") {
-        navCtrl.hideNavBar();
-      } else {
-        navCtrl.showNavBar();
-      }
-
-      $scope.$on('$destroy', function() {
-        if(childElement) {
-          childElement.remove();
-        }
-      });
-    
-      // Push this controller onto the stack
-      navCtrl.pushController($scope, $element);
-    }
-  }
-}])
-
-/**
- * Tell the nav controller in the current scope to push a new
- * controller onto the stack, with the given template URL.
- */
-.directive('navPush', function() {
-  return {
-    restrict: 'A',
-    link: function($scope, $element, $attr) {
-      var templateUrl = $attr.navPush;
-
-      var pushTemplate = ionic.throttle(function(e) {
-        $scope.$apply(function() {
-          $scope.navController && $scope.navController.pushFromTemplate(templateUrl);
-        });
-        return false;
-      }, 300, {
-        trailing: false
-      });
-
-      $element.bind('tap', pushTemplate);
-
-      $scope.$on('$destroy', function() {
-        $element.unbind('tap', pushTemplate);
-      });
-    }
-  }
-})
-
-/**
- * Tell the nav controller in the current scope to pop the top controller
- * and go back in the stack.
- */
-.directive('navPop', function() {
-  return {
-    restrict: 'A',
-    link: function($scope, $element, $attr, navCtrl) {
-      var popTemplate = ionic.throttle(function(e) {
-        $scope.$apply(function() {
-          $scope.navController && navController.pop();
-        });
-        return false;
-      }, 300, {
-        trailing: false
-      });
-
-      $element.bind('tap', popTemplate);
-
-      $scope.$on('$destroy', function() {
-        $element.unbind('tap', popTemplate);
-      });
-    }
-  }
-})
-
-})();
-;
-(function() {
-'use strict';
-
-/**
  * @description
  * The NavController is a navigation stack View Controller modelled off of 
  * UINavigationController from Cocoa Touch. With the Nav Controller, you can
@@ -1414,7 +1087,7 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
       };
     }],
 
-    link: function($scope, $element, $attr) {
+    link: function($scope, $element, $attr, ctrl) {
       if(!$element.length) return;
 
       $scope.animation = $attr.animation;
@@ -1472,6 +1145,10 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
           isFirst = false;
         }
       });  
+
+      $scope.$on('navRouter.goBack', function(e) {
+        ctrl.goBack();
+      });
 
 
       // Keep track of location changes and update a stack pointer that tracks whether we are
@@ -1565,11 +1242,11 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
     template: '<header class="bar bar-header nav-bar" ng-class="{invisible: !navController.navBar.isVisible}">' + 
         '<div class="buttons"> ' +
           '<button nav-back class="button" ng-if="enableBackButton && showBackButton" ng-class="backButtonClass" ng-bind-html="backButtonLabel"></button>' +
-          '<button ng-click="button.tap($event)" ng-repeat="button in leftButtons" class="button {{button.type}}" ng-bind="button.text"></button>' + 
+          '<button ng-click="button.tap($event)" ng-repeat="button in leftButtons" class="button {{button.type}}" ng-bind-html="button.content"></button>' + 
         '</div>' +
         '<h1 class="title" ng-bind="currentTitle"></h1>' + 
         '<div class="buttons" ng-if="rightButtons.length"> ' +
-          '<button ng-click="button.tap($event)" ng-repeat="button in rightButtons" class="button {{button.type}}" ng-bind="button.text"></button>' + 
+          '<button ng-click="button.tap($event)" ng-repeat="button in rightButtons" class="button {{button.type}}" ng-bind-html="button.content"></button>' + 
         '</div>' +
       '</header>',
     link: function($scope, $element, $attr, navCtrl) {
@@ -1657,6 +1334,13 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
         }
       });
 
+      // If a nav page changes the left or right buttons, update our scope vars
+      $scope.$parent.$on('navRouter.leftButtonsChanged', function(e, data) {
+        $scope.leftButtons = data;
+      });
+      $scope.$parent.$on('navRouter.rightButtonsChanged', function(e, data) {
+        $scope.rightButtons = data;
+      });
 
       /*
       $scope.$parent.$on('navigation.push', function() {
@@ -1707,7 +1391,7 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
       $scope.$watch(leftButtonsGet, function(value) {
         $scope.leftButtons = value;
         if($scope.doesUpdateNavRouter) {
-          $scope.$emit('navRouter.leftButtonsChanged', $scope.rightButtons);
+          $scope.$emit('navRouter.leftButtonsChanged', $scope.leftButtons);
         }
       });
 
@@ -1715,6 +1399,9 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
       var rightButtonsGet = $parse($attr.rightButtons);
       $scope.$watch(rightButtonsGet, function(value) {
         $scope.rightButtons = value;
+        if($scope.doesUpdateNavRouter) {
+          $scope.$emit('navRouter.rightButtonsChanged', $scope.rightButtons);
+        }
       });
 
       // watch for changes in the title
@@ -1734,7 +1421,6 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
 .directive('navBack', ['$window', '$rootScope', 'Gesture', function($window, $rootScope, Gesture) {
   return {
     restrict: 'AC',
-    require: '^?navRouter',
     link: function($scope, $element, $attr, navCtrl) {
       var goBack = function(e) {
         // Only trigger back if the stack is greater than zero
@@ -1742,7 +1428,7 @@ angular.module('ionic.ui.navRouter', ['ionic.service.gesture'])
           $window.history.back();
 
           // Fallback for bad history supporting devices
-          navCtrl.goBack();
+          $scope.$emit('navRouter.goBack');
         }
         e.alreadyHandled = true;
         return false;
@@ -1770,8 +1456,8 @@ angular.module('ionic.ui.radio', [])
       value: '@'
     },
     transclude: true,
-    template: '<label ng-click="tapHandler($event)" class="item item-radio">\
-                <input type="radio" name="group">\
+    template: '<label class="item item-radio">\
+                <input type="radio" name="radio-group">\
                 <div class="item-content" ng-transclude>\
                 </div>\
                 <i class="radio-icon icon ion-checkmark"></i>\
@@ -1786,19 +1472,14 @@ angular.module('ionic.ui.radio', [])
 
       if(!radio.length) { return; }
 
-      $scope.tapHandler = function(e) {
-        radio[0].checked = true;
-        ngModel.$setViewValue($scope.$eval($attr.ngValue));
-        e.alreadyHandled = true;
-      };
-
-      var clickHandler = function(e) {
-        ngModel.$setViewValue($scope.$eval($attr.ngValue));
-      };
-
       if(ngModel) {
-        //$element.bind('tap', tapHandler);
-        $element.bind('click', clickHandler);
+        radio.bind('click', function(e) {
+          console.log('RADIO CLICK');
+          $scope.$apply(function() {
+            ngModel.$setViewValue($scope.$eval($attr.ngValue));
+          });
+          e.alreadyHandled = true;
+        });
 
         ngModel.$render = function() {
           var val = $scope.$eval($attr.ngValue);
@@ -1811,9 +1492,183 @@ angular.module('ionic.ui.radio', [])
       }
     }
   };
+})
+
+// The radio button is a radio powered element with only
+// one possible selection in a set of options.
+.directive('radioButtons', function() {
+  return {
+    restrict: 'E',
+    replace: true,
+    require: '?ngModel',
+    scope: {
+      value: '@'
+    },
+    transclude: true,
+    template: '<div class="button-bar button-bar-inline" ng-transclude></div>',
+
+    controller: ['$scope', '$element', function($scope, $element) {
+
+      this.select = function(element) {
+        var c, children = $element.children();
+        for(var i = 0; i < children.length; i++) {
+          c = children[i];
+          if(c != element[0]) {
+            c.classList.remove('active');
+          }
+        }
+      };
+
+    }],
+
+    link: function($scope, $element, $attr, ngModel) {
+      var radio;
+
+      if(ngModel) {
+        //$element.bind('tap', tapHandler);
+
+        ngModel.$render = function() {
+          var children = $element.children();
+          for(var i = 0; i < children.length; i++) {
+            children[i].classList.remove('active');
+          }
+          $scope.$parent.$broadcast('radioButton.select', ngModel.$viewValue);
+        };
+      }
+    }
+  };
+})
+
+.directive('buttonRadio', function() {
+  return {
+    restrict: 'CA',
+    require: ['?^ngModel', '?^radioButtons'],
+    link: function($scope, $element, $attr, ctrls) {
+      var ngModel = ctrls[0];
+      var radioButtons = ctrls[1];
+      if(!ngModel || !radioButtons) { return; }
+
+      var setIt = function() {
+        console.log('SET');
+        $element.addClass('active');
+        ngModel.$setViewValue($scope.$eval($attr.ngValue));
+
+        radioButtons.select($element);
+      };
+
+      var clickHandler = function(e) {
+        console.log('CLICK');
+        setIt();
+      };
+
+      $scope.$on('radioButton.select', function(e, val) {
+        if(val == $scope.$eval($attr.ngValue)) {
+          $element.addClass('active');
+        }
+      });
+        
+      $element.bind('click', clickHandler);
+    }
+  };
 });
 
 })(window.ionic);
+;
+(function() {
+'use strict';
+
+angular.module('ionic.ui.scroll', [])
+
+.directive('scroll', ['$parse', '$timeout', function($parse, $timeout) {
+  return {
+    restrict: 'E',
+    replace: true,
+    template: '<div class="scroll-view"></div>',
+    transclude: true,
+    scope: {
+      direction: '@',
+      onRefresh: '&',
+      onScroll: '&',
+      refreshComplete: '=',
+      scroll: '@',
+    },
+
+    compile: function(element, attr, transclude) {
+      return function($scope, $element, $attr) {
+        var clone, sv, sc = document.createElement('div');
+
+        sc.className = 'scroll';
+        if(attr.padding == "true") {
+          sc.className += ' padding';
+          addedPadding = true;
+        }
+        $element.append(sc);
+
+        // Pass the parent scope down to the child
+        clone = transclude($scope.$parent);
+        angular.element($element[0].firstElementChild).append(clone);
+
+        var refresher = $element[0].querySelector('.scroll-refresher');
+        var refresherHeight = refresher && refresher.clientHeight || 0;
+
+        if(attr.refreshComplete) {
+          $scope.refreshComplete = function() {
+            if($scope.scrollView) {
+              refresher && refresher.classList.remove('active');
+              $scope.scrollView.finishPullToRefresh();
+              $scope.$parent.$broadcast('scroll.onRefreshComplete');
+            }
+          };
+        }
+
+
+        // Otherwise, supercharge this baby!
+        // Add timeout to let content render so Scroller.resize grabs the right content height
+        $timeout(function() { 
+          var hasScrollingX = $scope.direction.indexOf('x') >= 0;
+          var hasScrollingY = $scope.direction.indexOf('y') >= 0;
+
+          sv = new ionic.views.Scroll({
+            el: $element[0],
+            scrollingX: hasScrollingX,
+            scrollingY: hasScrollingY
+          });
+
+          // Activate pull-to-refresh
+          if(refresher) {
+            sv.activatePullToRefresh(refresherHeight, function() {
+              refresher.classList.add('active');
+            }, function() {
+              refresher.classList.remove('refreshing');
+              refresher.classList.remove('active');
+            }, function() {
+              refresher.classList.add('refreshing');
+              $scope.onRefresh();
+              $scope.$parent.$broadcast('scroll.onRefresh');
+            });
+          }
+
+          $element.bind('scroll', function(e) {
+            $scope.onScroll({
+              event: e,
+              scrollTop: e.detail ? e.detail.scrollTop : e.originalEvent ? e.originalEvent.detail.scrollTop : 0,
+              scrollLeft: e.detail ? e.detail.scrollLeft: e.originalEvent ? e.originalEvent.detail.scrollLeft : 0
+            });
+          });
+
+          $scope.$parent.$on('scroll.refreshComplete', function(e) {
+            sv && sv.finishPullToRefresh();
+          });
+          
+          // Let child scopes access this 
+          $scope.$parent.scrollView = sv;
+        }, 500);
+      };
+    }
+  };
+}]);
+
+})();
 ;
 (function() {
 'use strict';
@@ -1831,8 +1686,6 @@ angular.module('ionic.ui.sideMenu', ['ionic.service.gesture'])
  * extends our core Ionic side menu controller and exposes
  * some side menu stuff on the current scope.
  */
-.controller('SideMenuCtrl', ['$scope', function($scope) {
-}])
 
 .directive('sideMenus', function() {
   return {
@@ -1845,12 +1698,12 @@ angular.module('ionic.ui.sideMenu', ['ionic.service.gesture'])
       ionic.controllers.SideMenuController.call(this, {
         // Our quick implementation of the left side menu
         left: {
-          width: 270,
+          width: 275,
         },
 
         // Our quick implementation of the right side menu
         right: {
-          width: 270,
+          width: 275,
         }
       });
 
@@ -1875,25 +1728,43 @@ angular.module('ionic.ui.sideMenu', ['ionic.service.gesture'])
         $element.addClass('menu-content');
 
         var defaultPrevented = false;
+        var isDragging = false;
 
         ionic.on('mousedown', function(e) {
           // If the child element prevented the drag, don't drag
           defaultPrevented = e.defaultPrevented;
         });
 
+        // Listen for taps on the content to close the menu
+        /*
+        ionic.on('tap', function(e) {
+          sideMenuCtrl.close();
+        }, $element[0]);
+        */
+
         var dragFn = function(e) {
           if(defaultPrevented) {
             return;
           }
+          isDragging = true;
           sideMenuCtrl._handleDrag(e);
           e.gesture.srcEvent.preventDefault();
+        };
+
+        var dragVertFn = function(e) {
+          if(isDragging) {
+            e.gesture.srcEvent.preventDefault();
+          }
         };
 
         //var dragGesture = Gesture.on('drag', dragFn, $element);
         var dragRightGesture = Gesture.on('dragright', dragFn, $element);
         var dragLeftGesture = Gesture.on('dragleft', dragFn, $element);
+        var dragUpGesture = Gesture.on('dragup', dragVertFn, $element);
+        var dragDownGesture = Gesture.on('dragdown', dragVertFn, $element);
 
         var dragReleaseFn = function(e) {
+          isDragging = false;
           if(!defaultPrevented) {
             sideMenuCtrl._endDrag(e);
           }
@@ -1926,8 +1797,10 @@ angular.module('ionic.ui.sideMenu', ['ionic.service.gesture'])
 
         // Cleanup
         $scope.$on('$destroy', function() {
-          Gesture.off(dragLeftGesture, 'drag', dragFn);
-          Gesture.off(dragRightGesture, 'drag', dragFn);
+          Gesture.off(dragLeftGesture, 'dragleft', dragFn);
+          Gesture.off(dragRightGesture, 'dragright', dragFn);
+          Gesture.off(dragUpGesture, 'dragup', dragFn);
+          Gesture.off(dragDownGesture, 'dragdown', dragFn);
           Gesture.off(releaseGesture, 'release', dragReleaseFn);
         });
       };
@@ -1995,13 +1868,25 @@ angular.module('ionic.ui.slideBox', [])
     restrict: 'E',
     replace: true,
     transclude: true,
+    scope: {},
     controller: ['$scope', '$element', function($scope, $element) {
       $scope.slides = [];
       this.slideAdded = function() {
         $scope.slides.push({});
       };
+
+      angular.extend(this, ionic.views.SlideBox.prototype);
+
+      ionic.views.SlideBox.call(this, {
+        el: $element[0],
+        slideChanged: function(slideIndex) {
+          $scope.$parent.$broadcast('slideBox.slideChanged', slideIndex);
+          $scope.$apply();
+        }
+      });
+
+      $scope.$parent.slideBox = this;
     }],
-    scope: {},
     template: '<div class="slide-box">\
             <div class="slide-box-slides" ng-transclude>\
             </div>\
@@ -2013,16 +1898,9 @@ angular.module('ionic.ui.slideBox', [])
         var childScope = $scope.$new();
         var pager = $compile('<pager></pager>')(childScope);
         $element.append(pager);
-
-        $scope.slideBox = new ionic.views.SlideBox({
-          el: $element[0],
-          slideChanged: function(slideIndex) {
-            $scope.$parent.$broadcast('slideBox.slideChanged', slideIndex);
-          }
-        });
       }
     }
-  }
+  };
 }])
 
 .directive('slide', function() {
@@ -2035,9 +1913,9 @@ angular.module('ionic.ui.slideBox', [])
     compile: function(element, attr, transclude) {
       return function($scope, $element, $attr, slideBoxCtrl) {
         slideBoxCtrl.slideAdded();
-      }
+      };
     }
-  }
+  };
 })
 
 .directive('pager', function() {
@@ -2046,7 +1924,7 @@ angular.module('ionic.ui.slideBox', [])
     replace: true,
     require: '^slideBox',
     template: '<div class="slide-box-pager"><span ng-repeat="slide in slides"><i class="icon ion-record"></i></span></div>'
-  }
+  };
 
 });
 
@@ -2103,7 +1981,7 @@ angular.module('ionic.ui.tabs', ['ngAnimate'])
       $scope.tabsController = this;
     }],
     //templateUrl: 'ext/angular/tmpl/ionicTabBar.tmpl.html',
-    template: '<div class="content"><tab-controller-bar></tab-controller-bar></div>',
+    template: '<div class="view"><tab-controller-bar></tab-controller-bar></div>',
     compile: function(element, attr, transclude, tabsCtrl) {
       return function($scope, $element, $attr) {
         var tabs = $element[0].querySelector('.tabs');
@@ -2145,7 +2023,6 @@ angular.module('ionic.ui.tabs', ['ngAnimate'])
 .directive('tab', ['$animate', '$parse', function($animate, $parse) {
   return {
     restrict: 'E',
-    replace: true,
     require: '^tabs',
     scope: true,
     transclude: 'element',
@@ -2204,6 +2081,9 @@ angular.module('ionic.ui.tabs', ['ngAnimate'])
             childScope = $scope.$new();
             transclude(childScope, function(clone) {
               childElement = clone;
+
+              clone.addClass('pane');
+
               $animate.enter(clone, $element.parent(), $element);
 
               if($scope.title) {
@@ -2223,7 +2103,7 @@ angular.module('ionic.ui.tabs', ['ngAnimate'])
             });
           }
         });
-      }
+      };
     }
   };
 }])
@@ -2284,7 +2164,7 @@ angular.module('ionic.ui.tabs', ['ngAnimate'])
     transclude: true,
     template: '<div class="tabs tabs-primary" ng-transclude>' + 
     '</div>'
-  }
+  };
 });
 
 ;
@@ -2301,7 +2181,7 @@ angular.module('ionic.ui.toggle', [])
     replace: true,
     require: '?ngModel',
     scope: {},
-    template: '<div ng-click="toggleIt($event)" class="toggle"><input type="checkbox"><div class="track"><div class="handle"></div></div></div>',
+    template: '<div ng-click="toggleIt($event)" class="toggle" skip-tap-poly><input type="checkbox"><div class="track"><div class="handle"></div></div></div>',
 
     link: function($scope, $element, $attr, ngModel) {
       var checkbox, handle;
@@ -2349,10 +2229,10 @@ angular.module('ionic.ui.virtRepeat', [])
         var virtualList = ctrls[1];
 
         virtualList.listView.renderViewport = function(high, low, start, end) {
-        }
-      }
+        };
+      };
     }
-  }
+  };
 });
 })(ionic);
 ;
@@ -2410,7 +2290,7 @@ function findViewportAndContent(startElement){
         break;
       }
     }
-    if( n == null ){
+    if( n === null ){
       // That element should work as a viewport.
       return {
         viewport: angular.element(e),
@@ -2678,7 +2558,7 @@ angular.module('ionic.ui.virtualRepeat', [])
           // The watch on the collection is just a watch on the length of the
           // collection. We don't care if the content changes.
           scope.$watch(sfVirtualRepeatWatchExpression, sfVirtualRepeatListener, true);
-        }
+        };
       }
     };
   }]);

@@ -7,7 +7,18 @@
 
     <!-- Pets tab -->
     <tab title="Lobby" icon="icon ion-home" ng-controller="RoomsTabCtrl">
-      <content has-header="true" has-tabs="true">
+      <content
+        has-header="true"
+        has-footer="true"
+        has-tabs="true"
+        scroll="true"
+        padding="true"
+        on-refresh="onRefresh()"
+        >
+
+        <!-- for pull to refresh -->
+        <refresher></refresher>
+        
         <list>
           <link-item ng-repeat="room in rooms" type="item-text-wrap" href="#/rooms/{{room.id}}">
               <h3>{{room.title}}</h3>
@@ -20,11 +31,12 @@
 
     <!-- Adoption tab -->
     <tab title="New Room" icon="icon ion-heart" ng-controller="NewRoomCtrl">
-      <content has-header="true" has-tabs="true">
+      <content has-header="true">                  
         <div class="padding">
           <h2>Create a room today.</h2>
         </div>
-        <form data-ng-submit="createRoom()">
+
+        <form ui-keypress="{13:'createRoom($event)'}">
           <div class="list list-inset">
             <label class="item item-input">
               <span class="input-label">Chat room name</span>
@@ -38,7 +50,9 @@
               <span class="input-label">Chat room description</span>              
               <input type="text" placeholder="e.g. How to do recursion" data-ng-model="newRoomDescription" >
             </label>
-            <input type="submit" class="button button-positive button-outline" />
+          </div>
+          <div class="padding">
+            <button class="button button-full button-positive" ng-click="createRoom()">Submit</button>
           </div>
         </form>
       </content>

@@ -1,5 +1,17 @@
 <nav-page title="room.title">
-  <content has-header="true" padding="true">    
+  <content
+    has-header="true"
+    has-footer="true"
+    scroll="true"
+    padding="true"
+    on-refresh="onRefresh()"
+    on-refresh-opening="onRefreshOpening(amount)"
+    refresh-complete="refreshComplete"
+    >
+
+    <!-- for pull to refresh -->
+    <refresher></refresher>
+      
     <div ng-repeat="message in room.messages" type="item-text-wrap">    
       <div class="card">
         <div class="item item-divider">
@@ -20,7 +32,7 @@
       <form ui-keypress="{13:'submitAddMessage($event)'}" data-ng-submit="submitAddMessage()" >
         <label class="item item-input">
           <input type="text" placeholder="your message ..." data-ng-model="newMessage">
-          <input type="submit" class="button button-outline button-positive button-small" value="Send">
+          <button class="button button-positive">Send</button>
         </label>
       </form>
     </div>
