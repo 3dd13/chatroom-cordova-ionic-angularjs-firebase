@@ -13,14 +13,14 @@
     <refresher></refresher>
       
     <div ng-repeat="message in room.messages" type="item-text-wrap">    
-      <div class="card">
-        <div class="item item-divider">
+      <div class="card item-message">
+        <div class="item-message-header">
           <div class="row">
-            <div class="col">{{message.created_by}}</div>
-            <div class="col text-right">{{message.created_at | date: 'short' }}</div>
+            <small class="col">{{message.created_by}}:</small>
+            <small class="col text-right">{{message.created_at | date: 'short' }}</small>
           </div>
         </div>
-        <div class="item item-body item-text-wrap">
+        <div class="item-message-body item-text-wrap">
           {{message.content}}
         </div>
       </div>

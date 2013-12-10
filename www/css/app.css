@@ -9,3 +9,15 @@
 #bar-footer-message-box .list {
   width: 100%;
 }
+
+.item-message {
+  background-color: #DEF;
+}
+
+.item-message-header {
+  
+}
+
+.item-message-body {
+  padding: 4px 20px; 
+}
