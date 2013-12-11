@@ -19,6 +19,9 @@
     <script src="js/angular/angular-touch.js"></script>
     <script src="js/angular/angular-sanitize.js"></script>
     <script src="js/ionic-angular.js"></script>
+    
+    <script src="//cdn.firebase.com/v0/firebase.js"></script>
+    <script src="//cdn.firebase.com/libs/angularfire/0.3.0/angularfire.min.js"></script>
 
     <!-- cordova script -->
     <script src="cordova.js"></script>
@@ -44,8 +47,8 @@
         <content has-header="true">
           <ul class="list">
             <a ng-click="toggleSideMenu()" class="item">Lobby</a>
-            <a href="#/rooms/new" ng-click="toggleSideMenu()" class="item">New Room</a>
-            <a href="#/about" ng-click="toggleSideMenu()" class="item">About</a>        
+            <a ng-click="goToNewRoom()" class="item">New Room</a>
+            <a ng-click="goToAbout()" class="item">About</a>        
           </ul>
         </content>
       </side-menu>

@@ -1,13 +1,29 @@
 angular.module('chatRoom.controllers', [])
 
-.controller('AppCtrl', function($scope) {
+.controller('AppCtrl', function($scope, $location) {  
+  $scope.goToNewRoom = function() {
+    $location.path('/rooms/new');
+    $scope.toggleSideMenu();
+  };
+  
+  $scope.goToAbout = function() {
+    $location.path('/about');
+    $scope.toggleSideMenu();
+  };
+  
+  $scope.goToHome = function() {
+    $location.path('/home');
+  };  
+    
   $scope.toggleSideMenu = function() {
     $scope.sideMenuController.toggleLeft();
-  };  
+  };
 })
 
-.controller('MainCtrl', function($scope, $timeout, Rooms) {
-  $scope.rooms = Rooms.all();
+.controller('MainCtrl', function($scope, $timeout, angularFire) {
+  $scope.rooms = [];
+  var ref = new Firebase('https://chatroom-io.firebaseio.com/opened_rooms');  
+  angularFire(ref, $scope, "rooms");
   
   $scope.rightButtons = [
     { 
@@ -20,62 +36,63 @@ angular.module('chatRoom.controllers', [])
   
   $scope.onRefresh = function() {    
     var stop = $timeout(function() {
-      $scope.rooms = Rooms.all();
+      $scope.rooms = [];
+      var ref = new Firebase('https://chatroom-io.firebaseio.com/opened_rooms');  
+      angularFire(ref, $scope, "rooms");
+            
       $scope.$broadcast('scroll.refreshComplete');
     }, 1000);
   };
-
-  $scope.$on('tab.shown', function() {
-    // Might do a load here
-  });
-  $scope.$on('tab.hidden', function() {
-    // Might recycle content here
-  });
 })
 
-.controller('NewRoomCtrl', function($scope, $routeParams, $location, Rooms) {
+.controller('NewRoomCtrl', function($scope, $location, angularFire) {      
   $scope.newRoomName = "";
   $scope.newRoomNameId = "";
-  
-  $scope.$on('tab.shown', function() {
-    $scope.newRoomName = "";
-    $scope.newRoomNameId = "";
-  });
-  
-  $scope.$on('tab.hidden', function() {
-    // Might recycle content here
-  });
-    
+  $scope.newRoomDescription = "";
+
   $scope.setNewRoomNameId = function() {
     this.newRoomNameId = this.newRoomName.toLowerCase().replace(/\s/g,"-").replace(/[^a-z0-9\-]/g, '');
   };
   
-  $scope.createRoom = function() { 
-    Rooms.add(this.newRoomName, this.newRoomNameId, this.newRoomDescription);    
-    $scope.controllers[0].tabsController.select(0);
-  }
+  $scope.createRoom = function() {
+    $scope.rooms = [];
+    var ref = new Firebase('https://chatroom-io.firebaseio.com/opened_rooms');  
+    var promise = angularFire(ref, $scope, "rooms");
+    promise.then(function() {
+      $scope.rooms.push({
+        id: Math.floor(Math.random() * 5000001),
+        title: $scope.newRoomName,
+        slug: $scope.newRoomNameId, 
+        description: $scope.newRoomDescription
+      });
+      
+      $location.path('/home');
+    })
+  };
 })
 
-.controller('RoomCtrl', function($scope, $routeParams, $timeout, Rooms) {
-  $scope.room = Rooms.get($routeParams.roomId);
+.controller('RoomCtrl', function($scope, $routeParams, $timeout, angularFire) {
   $scope.newMessage = "";
+  $scope.messages = [];
   
-  $scope.onRefresh = function() {    
+  var ref = new Firebase('https://chatroom-io.firebaseio.com/rooms/' + $routeParams.roomId);
+  var promise = angularFire(ref.limit(15), $scope, "messages");
+  
+  $scope.username = 'User' + Math.floor(Math.random() * 501);
+  $scope.submitAddMessage = function() {
+    $scope.messages.push({
+      created_by: this.username,
+      content: this.newMessage,
+      created_at: new Date()
+    });
+    this.newMessage = "";
+  };
+  
+  $scope.onRefresh = function() {
     var stop = $timeout(function() {
       $scope.$broadcast('scroll.refreshComplete');
     }, 1000);
   };
-  
-  $scope.submitAddMessage = function() {
-    data = {
-      created_by: "Eddie Lau Current",
-      content: this.newMessage,
-      created_at: new Date()
-    };
-    this.room.messages.push(data);
-    
-    this.newMessage = "";
-  }
 })
 
 .controller('AboutCtrl', function($scope) {

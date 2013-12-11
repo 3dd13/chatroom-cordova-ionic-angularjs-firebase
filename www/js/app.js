@@ -1,4 +1,4 @@
-angular.module('chatRoom', ['ionic', 'ngRoute', 'ngAnimate', 'chatRoom.services', 'chatRoom.controllers'])
+angular.module('chatRoom', ['ionic', 'ngRoute', 'ngAnimate', 'chatRoom.services', 'chatRoom.controllers', 'firebase'])
 
 .config(function ($compileProvider){
   $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|ftp|mailto|file|tel):/);
@@ -6,7 +6,7 @@ angular.module('chatRoom', ['ionic', 'ngRoute', 'ngAnimate', 'chatRoom.services'
 
 .config(function($routeProvider, $locationProvider) {
   $routeProvider.when('/home', {
-    templateUrl: 'templates/app.html',
+    templateUrl: 'templates/home.html',
     controller: 'MainCtrl'
   });
   

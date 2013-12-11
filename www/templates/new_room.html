@@ -1,29 +1,26 @@
-<nav-bar animation="nav-title-slide-ios7" class="nav-title-slide-ios7" type="bar-calm" back-button-type="button-icon" back-button-icon="icon ion-arrow-left-c">
-</nav-bar>
-<nav-page title="room.title">
-  <content has-header="true">
-    <div class="padding">
-      <h2>Create a room</h2>
-    </div>
+<header class="bar bar-header bar-calm">
+  <button class="button button-icon" ng-click="goToHome()"><i class="icon ion-home"></i></button>
+  <h1 class="title">Create a room</h1>
+</header>
 
-    <form ui-keypress="{13:'createRoom($event)'}">
-      <div class="list list-inset">
-        <label class="item item-input item-stacked-label">
-          <span class="input-label">Chat room name</span>
-          <input type="text" placeholder="e.g. Homework Discussion" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
-        </label>
-        <label class="item item-input item-stacked-label">
-          <span class="input-label">Room ID</span>              
-          <input type="text"  data-ng-model="newRoomNameId" readonly="readonly">
-        </label>                    
-        <label class="item item-input item-stacked-label">
-          <span class="input-label">Chat room description</span>              
-          <input type="text" placeholder="e.g. How to do recursion" data-ng-model="newRoomDescription" >
-        </label>
-      </div>
-      <div class="padding">
-        <button class="button button-full button-positive" ng-click="createRoom()">Submit</button>
-      </div>
-    </form>
-  </content>
-</nav-page>
+<content has-header="true">        
+  <form ui-keypress="{13:'createRoom()'}">
+    <div class="list list-inset">
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Chat room name</span>
+        <input type="text" placeholder="e.g. Homework Discussion" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
+      </label>
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Room ID</span>              
+        <input type="text"  data-ng-model="newRoomNameId" readonly="readonly">
+      </label>                    
+      <label class="item item-input item-stacked-label">
+        <span class="input-label">Chat room description</span>              
+        <input type="text" placeholder="e.g. How to do recursion" data-ng-model="newRoomDescription" >
+      </label>
+    </div>
+    <div class="padding">
+      <button class="button button-full button-positive" ng-click="createRoom()">Submit</button>
+    </div>
+  </form>
+</content>
