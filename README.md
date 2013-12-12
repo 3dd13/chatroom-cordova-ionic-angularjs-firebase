@@ -1,8 +1,11 @@
-Sample Ionic android setup
+Chat Room apps with Cordova, Angularjs & Ionic
 =========================
 
-Trying setup and make ionic, cordova and android SDK works together
-I am working on Mac.
+Slides for codeaholics.hk sharing here: (Dec 2013)
+[http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics] (http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics)
+
+Trying to make ionic, cordova and mobile SDK works together on my Mac.
+And built a Chat Room apps for my coding course students.
 
 
 Install libraries
