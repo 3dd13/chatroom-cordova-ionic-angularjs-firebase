@@ -79,3 +79,13 @@ Run the app in XCode
 
 the xcode project file (.xcodeproj) will be available in platforms/ios
 
+
+Note to myself
+---------------
+
+the following doesn't work on mobile:
+
+    <script src="//cdn.firebase.com/v0/firebase.js"></script>
+    <script src="//cdn.firebase.com/libs/angularfire/0.3.0/angularfire.min.js"></script>
+    
+    
