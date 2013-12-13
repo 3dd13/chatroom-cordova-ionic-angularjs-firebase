@@ -26,6 +26,7 @@ Create new app and build for android / ios
     cd hello-world
     cordova platform add android
     cordova platform add ios
+    cordova plugin add org.apache.cordova.device
     cordova build
 
 
