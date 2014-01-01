@@ -22,7 +22,7 @@ Install libraries
 Create new app and build for android / ios
 -----------------
 
-    ionic create hello-world
+    ionic start hello-world
     cd hello-world
     cordova platform add android
     cordova platform add ios
