@@ -3041,6 +3041,7 @@ a.subdued {
   border-top: 1px solid transparent;
   border-bottom: 1px solid #dddddd;
   background-color: white;
+  padding-top:10px;
   /* border-width: 1px will actually create 2 device pixels on retina */
   /* this nifty trick sets an actual 1px border on hi-res displays */
   background-size: 0; }
@@ -3128,6 +3129,7 @@ a.subdued {
     .bar.bar-dark .title {
       color: white; }
   .bar .title {
+    padding-top:5px;
     position: absolute;
     top: 0;
     right: 0;

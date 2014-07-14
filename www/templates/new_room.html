@@ -1,22 +1,22 @@
 
 <header class="bar bar-header bar-calm">
   <button class="button button-icon" ng-click="goToHome()"><i class="icon ion-home"></i></button>
-  <h1 class="title">Create a room</h1>
+  <h1 class="title">Create a Convo</h1>
 </header>
 
 <content has-header="true">        
   <form ui-keypress="{13:'createRoom()'}">
     <div class="list list-inset">
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Chat room name</span>
-        <input type="text" placeholder="e.g. Homework Discussion" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
+        <span class="input-label">Convo Name</span>
+        <input type="text" placeholder="e.g. Bus Stop Talk" data-ng-model="newRoomName" data-ng-change="setNewRoomNameId()">
       </label>
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Room ID</span>              
+        <span class="input-label">Convo ID</span>              
         <input type="text"  data-ng-model="newRoomNameId" readonly="readonly">
       </label>                    
       <label class="item item-input item-stacked-label">
-        <span class="input-label">Chat room description</span>              
+        <span class="input-label">Convo description</span>              
         <input type="text" placeholder="e.g. How to do recursion" data-ng-model="newRoomDescription" >
       </label>
     </div>
