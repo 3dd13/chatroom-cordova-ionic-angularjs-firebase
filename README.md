@@ -1,6 +1,8 @@
 Talk2: Location-based Chat Room app with Cordova, Angularjs & Ionic
-Forked from Firebase-Angular Chat app  (http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics)
 =========================
+
+Forked from Firebase-Angular Chat app  (http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics)
+
 
 
 
