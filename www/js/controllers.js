@@ -224,8 +224,24 @@ jGlob = $scope;
   var ref = new Firebase('https://talk2.firebaseio.com/rooms/' + $routeParams.roomId);
    ref.on('value', function(dataSnapshot) {
   // code to handle new value.
-
-
+ 
+  console.log($('.item-message').length);
+  if($('.item-message').length==0){
+  
+   setTimeout(function(){
+       sayHelloUponEnter({room:$routeParams.roomId, "msg":"hello",  "user":"user500"});
+ 
+     }, 1000)
+ }
+  else{
+ 
+    setTimeout(function(){
+       respondEveryUser({room:$routeParams.roomId, "msg":$($('.item-message:last').children()[1]).html().trim(),  "user":"user500"});
+ 
+     }, 2000)
+    }
+  
+  
   setTimeout(function(){
  $(".scroll").css('-webkit-transform','translate3d(0px, -'+(parseInt($('.scroll').css('height'))-250)+"px"+', 0px)');
     

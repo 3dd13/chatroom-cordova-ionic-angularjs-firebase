@@ -1,4 +1,7 @@
+//global default user position
 userPosition =[40.777225004040009, 73.95218489597806];
+
+//active watch...
 var activeWatch;
 document.addEventListener("deviceready", onDeviceReady, false);
 document.addEventListener("resume", onDeviceReady, false);
@@ -109,7 +112,51 @@ function watchLocation() {
 
 function logout() {
     clearInterval(activeWatch);
-}                                       
+}      
+
+
+//chat bot ... extra
+
+chatBotOn =true;
+function sayHelloUponEnter(msgParams){
+
+
+  chatBotOn=false;
+ 
+  msgParams['msg']="hello";
+  $.ajax({
+    url:"http://talk2bot-tester588.rhcloud.com/chatbot",
+    data:msgParams,
+    complete:function(transport){
+     
+      console.log(transport.responseText);
+    }
+
+  })
+
+} 
+
+function respondEveryUser(msgParams){
+  if(chatBotOn==false){
+    setTimeout(function(){
+      chatBotOn=true;
+    }, 6000);
+    return;
+
+  }
+  chatBotOn=false;
+  $.ajax({
+    url:"http://talk2bot-tester588.rhcloud.com/chatbot",
+    data:msgParams,
+    complete:function(transport){
+     
+      console.log(transport.responseText);
+    }
+
+  })
+
+
+}                                
 
 function userOffline(){
 
