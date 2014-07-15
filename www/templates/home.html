@@ -2,10 +2,10 @@
   <!-- where the content of each page will be rendered -->
   <header class="bar bar-header bar-calm">
     <button class="button button-icon" ng-click="toggleSideMenu()"><i class="icon ion-navicon"></i></button>
-    <h1 class="title">Lobby</h1>
+    <h1 class="title">talk 2</h1>
     <button class="button button-icon" ng-click="goToNewRoom()"><i class="icon ion-plus"></i></button>
   </header>
-  <content
+  <content id="theCont"
     has-header="true"
     has-footer="true"
     has-tabs="true"
@@ -18,9 +18,14 @@
     <!-- for pull to refresh -->
     <refresher></refresher>
     <list>
-      <link-item ng-repeat="room in rooms" type="item-text-wrap" href="#/rooms/{{room.id}}">
+
+      <!--
+    | orderBy:'id':true |
+
+    -->
+      <link-item ng-repeat="room in rooms | orderBy:'id':true | limitTo:30 |  orderBy:distanceFromHere: false" type="item-text-wrap" href="#/rooms/{{room.id}}">
           <h3>{{room.title}}</h3>
-          <p>{{room.description}}</p>
+          <p>{{distanceFromHere(room)}} mi.</p>
         </item>
       </link-item>
     </list>

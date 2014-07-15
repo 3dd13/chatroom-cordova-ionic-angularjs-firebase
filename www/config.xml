@@ -1,15 +1,36 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="com.ionicframework.chatRoom" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>ChatRoom.io</name>
+<widget id="talk2.talk2" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Talk2</name>
     <description>
-        Chat Room apps building on Ionic Framework app using Cordova and AngularJS
+        This Talk2 App was built on Ionic Framework app using Cordova and AngularJS and forked from 3dd13.me
     </description>
-    <author email="hi@3dd13.me" href="http://3dd13.me">
-        Eddie Lau
+    <author email="m@codecloud.me" href="http://codecloud.me">
+       Mike De'Shazer
     </author>
     <content src="index.html" />
     <access origin="*" />
     <preference name="fullscreen" value="true" />
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
+
+     
+    <feature name="Geolocation">
+        <param name="ios-package" value="CDVLocation" />
+    </feature>
+    <feature name="NetworkStatus">
+        <param name="ios-package" value="CDVConnection" />
+    </feature>
+    
+    <feature name="Notification">
+        <param name="ios-package" value="CDVNotification" />
+    </feature>
+    
+    <feature name="SplashScreen">
+        <param name="ios-package" value="CDVSplashScreen" />
+    </feature>
+    
+    <preference name="AutoHideSplashScreen" value="false" />
+
+
+
 </widget>
