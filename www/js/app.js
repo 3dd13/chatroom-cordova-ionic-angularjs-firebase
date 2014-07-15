@@ -1,8 +1,11 @@
 userPosition =[40.777225004040009, 73.95218489597806];
+var activeWatch;
 document.addEventListener("deviceready", onDeviceReady, false);
 document.addEventListener("resume", onDeviceReady, false);
+
+
 document.addEventListener('deviceready', function() {
-   document.addEventListener('deviceready', watchLocation, false);
+ 
 
     setTimeout(function(){
       navigator.splashscreen.hide();
@@ -17,10 +20,19 @@ document.addEventListener('deviceready', function() {
 
    
     function onDeviceReady() {
+      //reset the locErrorShow message for no location, so that a user will only see the no location message once each session.  
+  locErrorShown=false;
+
+
+      //clear old intervals that were running
+      //logout();
+      logout();
+      setupWatch(10000);
 
         if(navigator.network.connection.type== "none"){
               userOffline();
             }
+
 
         navigator.geolocation.getCurrentPosition(onSuccess, onError);
       }
@@ -39,7 +51,7 @@ document.addEventListener('deviceready', function() {
       localStorage.setItem("lon", position.coords.longitude);
       
       jGlob.onRefresh();
-      
+
         var element = document.getElementById('geolocation');
         console.log ( 'Latitude: '           + position.coords.latitude              + '<br />' +
                             'Longitude: '          + position.coords.longitude             + '<br />' +
@@ -56,35 +68,53 @@ document.addEventListener('deviceready', function() {
 
     // onError Callback receives a PositionError object
     //
-    function onError(error) {
     
-        navigator.notification.alert(
-    'There was a problem getting your location. We are defaulting you to the Upper East Side of Manhattan in New York City, USA. \n To change this, please visit your phone\'s settings. Find this app in Location, and turn it on.',  // message
-    noLocation,         // callback
-    'Location Settings',            // title
-    'OK'                  // buttonName
-);
+    function onError(error) {
+    if(locErrorShown==false){
+      locErrorShown=true;
+               navigator.notification.alert(
+        'There was a problem getting your location. We are defaulting you to the Upper East Side of Manhattan in New York City, USA. \n To change this, please visit your phone\'s settings. Find this app in Location, and turn it on.',  // message
+        noLocation,         // callback
+        'Location Settings',            // title
+        'OK'                  // buttonName
+        );
+    }
+
+   
        // alert('code: '    + error.code    + '\n' +
             //  'message: ' + error.message + '\n');
     }
 
 
-    //watch user's location
-    geolocationOptions= { maximumAge: 3000, timeout: 5000, enableHighAccuracy: true };
 
-    watchId = null;
+// sets up the interval at the specified frequency
+function setupWatch(freq) {
+    // global var here so it can be cleared on logout (or whenever).
+    activeWatch = setInterval(watchLocation, freq);
+}
 
-    function watchLocation(){
-      watchId = navigator.geolocation.watchPosition(onSuccess,  [onError],
-                                                  [geolocationOptions]);
-    
-    }
-                                                
+// this is what gets called on the interval.
+function watchLocation() {
+  
+    var gcp = navigator.geolocation.getCurrentPosition(
+            onSuccess, onError);
+
+
+    // console.log(gcp);
+
+}
+
+
+// stop watching
+
+function logout() {
+    clearInterval(activeWatch);
+}                                       
 
 function userOffline(){
 
    navigator.notification.alert(
-    'It\'s hard to chat with others over the internet when you\'re not actually connected. \n Come back when you have some of that net connectivity.',  // message
+    'You are not currently connected to the internet. \nPlease connect to use all features of this application.',  // message
     alertDismissed,         // callback
     'Offline',            // title
     'OK'                  // buttonName
