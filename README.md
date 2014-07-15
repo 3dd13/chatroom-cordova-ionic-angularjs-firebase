@@ -1,11 +1,9 @@
-Chat Room apps with Cordova, Angularjs & Ionic
+Talk2: Location-based Chat Room app with Cordova, Angularjs & Ionic
 =========================
 
-Slides for codeaholics.hk sharing here: (Dec 2013)
-[http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics] (http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics)
+Forked from Firebase-Angular Chat app  (http://www.slideshare.net/EddieLau1/cordova-angularjs-ionic-codeaholics)
 
-Trying to make ionic, cordova and mobile SDK works together on my Mac.
-And built a Chat Room apps for my coding course students.
+
 
 
 Install libraries
@@ -19,14 +17,32 @@ Install libraries
 * download and setup ant in path: http://ant.apache.org/bindownload.cgi
 
 
-Create new app and build for android / ios
+Create new app and build for  ios
 -----------------
 
-    ionic create hello-world
-    cd hello-world
-    cordova platform add android
+    In your apps folder's terminal run:
+    cordova create talk2 talk2.talk2 talk2
+
+    (replace your app's name with talk2)
+
+    cd into the directory
+
+    Run:
+
     cordova platform add ios
-    cordova build
+
+    cd to platforms/ios/www
+
+    Run:
+
+    cordova plugin add org.apache.cordova.geolocation
+    cordova plugin add org.apache.cordova.device
+    cordova plugin add org.apache.cordova.dialogs
+    cordova plugin add org.apache.cordova.network-information
+
+
+
+
 
 
 Start modifying code and add features !
