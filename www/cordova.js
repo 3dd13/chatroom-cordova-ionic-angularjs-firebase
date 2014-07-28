@@ -1113,9 +1113,7 @@ function logUnfiredChannels(arr) {
 
 window.setTimeout(function() {
     if (channel.onDeviceReady.state != 2) {
-       // console.log('deviceready has not fired after 5 seconds.');
-        alert("We could not connect to the native features of your device, so we are using mock locations in example mode.");
-
+        console.log('deviceready has not fired after 5 seconds.');
         logUnfiredChannels(platformInitChannelsArray);
         logUnfiredChannels(channel.deviceReadyChannelsArray);
     }

@@ -1,8 +1,16 @@
-//global var for refreshing results
 var jGlob;
 
 angular.module('chatRoom.controllers', [])
 
+.controller('LoadingCtrl', function($scope, $ionicLoading) {
+  $scope.show = function() {
+    $ionicLoading.show({
+      template: 'Loading...'
+    });
+  };
+  $scope.hide = function(){
+    $ionicLoading.hide();
+  }})
 .controller('AppCtrl', function($scope, $location) {
   $scope.goToNewRoom = function() {
     $location.path('/rooms/new');
@@ -103,7 +111,14 @@ messageListQuery.on('child_added', function(snapshot) {
   }
 */
   }
-    $scope.getUserLocation = function(){
+  $scope.currentLocation=userPosition;
+
+
+  $scope.booyah= function(){
+    return 2;
+  }
+
+   $scope.getUserLocation = function(){
 
    
 
@@ -113,9 +128,11 @@ messageListQuery.on('child_added', function(snapshot) {
 
   $scope.currentLocation=$scope.getUserLocation();
 
+  
 
-  $scope.booyah= function(){
-    return 2;
+  $scope.goToIt = function(theUrl){
+
+    window.location=theUrl;
   }
   $scope.distanceFromHere = function (_item, _startPoint) {
 /*
@@ -220,28 +237,18 @@ jGlob = $scope;
 .controller('RoomCtrl', function($scope, $routeParams, $timeout, angularFire) {
   $scope.newMessage = "";
   $scope.messages = [];
+setTimeout(function() {
+  //alert();
+  //  var delegate = $ionicScrollDelegate.$getByHandle('myScroll');
 
+    // rest of related code included here...
+
+},10);
   var ref = new Firebase('https://talk2.firebaseio.com/rooms/' + $routeParams.roomId);
    ref.on('value', function(dataSnapshot) {
   // code to handle new value.
- 
-  console.log($('.item-message').length);
-  if($('.item-message').length==0){
-  
-   setTimeout(function(){
-       sayHelloUponEnter({room:$routeParams.roomId, "msg":"hello",  "user":"user500"});
- 
-     }, 1000)
- }
-  else{
- 
-    setTimeout(function(){
-       respondEveryUser({room:$routeParams.roomId, "msg":$($('.item-message:last').children()[1]).html().trim(),  "user":"user500"});
- 
-     }, 2000)
-    }
-  
-  
+
+
   setTimeout(function(){
  $(".scroll").css('-webkit-transform','translate3d(0px, -'+(parseInt($('.scroll').css('height'))-250)+"px"+', 0px)');
     
@@ -270,11 +277,4 @@ jGlob = $scope;
 })
 
 .controller('AboutCtrl', function($scope) {
-})
-
-
-
-.controller('LocCtrl', function($scope) {
-
-
 });

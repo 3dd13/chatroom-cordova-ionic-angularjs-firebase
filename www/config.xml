@@ -12,25 +12,4 @@
     <preference name="fullscreen" value="true" />
     <preference name="webviewbounce" value="false" />
     <preference name="UIWebViewBounce" value="false" />
-
-     
-    <feature name="Geolocation">
-        <param name="ios-package" value="CDVLocation" />
-    </feature>
-    <feature name="NetworkStatus">
-        <param name="ios-package" value="CDVConnection" />
-    </feature>
-    
-    <feature name="Notification">
-        <param name="ios-package" value="CDVNotification" />
-    </feature>
-    
-    <feature name="SplashScreen">
-        <param name="ios-package" value="CDVSplashScreen" />
-    </feature>
-    
-    <preference name="AutoHideSplashScreen" value="false" />
-
-
-
 </widget>

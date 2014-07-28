@@ -5,7 +5,7 @@
     <h1 class="title">talk 2</h1>
     <button class="button button-icon" ng-click="goToNewRoom()"><i class="icon ion-plus"></i></button>
   </header>
-  <content id="theCont"
+  <content
     has-header="true"
     has-footer="true"
     has-tabs="true"
@@ -16,18 +16,27 @@
     >
 
     <!-- for pull to refresh -->
-    <refresher></refresher>
+    <refresher pulling-text="Pull to refresh..."></refresher>
+
     <list>
 
       <!--
     | orderBy:'id':true |
 
     -->
-      <link-item ng-repeat="room in rooms | orderBy:'id':true | limitTo:30 |  orderBy:distanceFromHere: false" type="item-text-wrap" href="#/rooms/{{room.id}}">
+      <link-item ng-repeat="room in rooms | orderBy:'id':true | limitTo:30 |  orderBy:distanceFromHere: false" type="item-text-wrap" ng-click="goToIt('#/rooms/{{room.id}}');" style="z-index:50000" ng-controller="MainCtrl">
           <h3>{{room.title}}</h3>
           <p>{{distanceFromHere(room)}} mi.</p>
-        </item>
+       
       </link-item>
     </list>
   </content>
 </nav-page>
+
+<script>
+
+  function doIt(url){
+
+    window.location=url;
+  }
+</script>

@@ -50,6 +50,8 @@ angular.module('ionic', [
     'ngSanitize'
 ]);
 ;
+
+
 angular.module('ionic.service.actionSheet', ['ionic.service.templateLoad', 'ionic.ui.actionSheet', 'ngAnimate'])
 
 .factory('ActionSheet', ['$rootScope', '$document', '$compile', '$animate', '$timeout', 'TemplateLoader',
@@ -2562,5 +2564,7 @@ angular.module('ionic.ui.virtualRepeat', [])
       }
     };
   }]);
+
+
 
 })(ionic);
