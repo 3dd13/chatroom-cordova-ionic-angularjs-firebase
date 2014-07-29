@@ -261,6 +261,10 @@ setTimeout(function() {
   
   $scope.username = 'User' + Math.floor(Math.random() * 501);
   $scope.submitAddMessage = function() {
+
+    setTimeout(function(){
+      $('#mainInput').blur();
+    }, 100);
     $scope.messages.push({
       created_by: this.username,
       content: this.newMessage,
