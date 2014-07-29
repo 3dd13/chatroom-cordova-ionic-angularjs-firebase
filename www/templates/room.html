@@ -1,15 +1,23 @@
 <nav-bar animation="nav-title-slide-ios7" class="nav-title-slide-ios7" type="bar-calm" back-button-type="button-icon" back-button-icon="icon ion-arrow-left-c">
 </nav-bar>
 <nav-page title="title">
-  <content
+<style>
+  .has-footer{
+    bottom:100px !important;
+  }
+
+</style>
+  <content 
     has-header="true"
     has-footer="true"
     scroll="true"
     padding="true"
+    paging="true"
     on-refresh="onRefresh()"
     on-refresh-opening="onRefreshOpening(amount)"
     refresh-complete="refreshComplete"
      animate-nav="true"
+     delegate-handle="myScroll"
     >
 
     <!-- for pull to refresh -->
@@ -34,7 +42,7 @@
     <div class="list list-inset">
       <form ui-keypress="{13:'submitAddMessage($event)'}" data-ng-submit="submitAddMessage()" >
         <label class="item item-input">
-          <input type="text" placeholder="your message ..." data-ng-model="newMessage">
+          <input type="text" placeholder="your message ..." data-ng-model="newMessage" id="mainInput">
           <button class="button button-positive">Send</button>
         </label>
       </form>

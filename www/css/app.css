@@ -21,3 +21,36 @@
 .item-message-body {
   padding: 4px 20px; 
 }
+
+.bar.bar-calm{
+	background-color:#FE642E;
+	border-color: #c5376d;
+	background-image:linear-gradient(0deg, #c5376d, #c5376d 50%, transparent 50%)
+}
+
+.list .item:nth-child(odd){
+ 	background-color:#F2F2F2;
+
+}
+
+
+
+@font-face {
+    font-family: 'Pacifico';
+    font-style: normal;
+    font-weight: normal;
+    src: local('Pacifico'), url('../fonts/font.ttf') format('truetype');
+
+
+}
+
+
+.title{
+	font-family: 'Pacifico', Arial, sans-serif;
+    line-height: 1;
+    text-shadow: 0 -1px 1px rgba(175, 49, 95, .7);
+}
+
+#app-page{
+  background-color:#FE642E
+}
